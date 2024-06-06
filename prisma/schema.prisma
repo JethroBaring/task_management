@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id         Int         @id @unique @default(autoincrement())
+  email      String      @unique
+  password   String
+  createdAt  DateTime    @default(now())
+  firstName  String
+  lastName   String
+  workspaces Workspace[]
+  tasks      Task[]
+}
+
+model Workspace {
+  id        Int      @id @unique @default(autoincrement())
+  name      String
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId Int
+  columns   Column[]
+}
+
+model Column {
+  id          Int       @id @unique @default(autoincrement())
+  name        String
+  position    Int
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId Int
+  tasks       Task[]
+}
+
+model Task {
+  id          Int     @id @unique @default(autoincrement())
+  title       String
+  description String
+  status      String
+  position    Int
+  creator     User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId   Int
+  Column      Column? @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  columnId    Int?
+}
