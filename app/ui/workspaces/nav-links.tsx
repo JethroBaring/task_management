@@ -31,12 +31,12 @@ export default function NavLinks() {
   }, [visible]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         inputRef.current &&
-        !inputRef.current?.contains(event.target) &&
-        !addButtonRef.current?.contains(event.target) &&
-        !parentContainerRef.current?.contains(event.target)
+        !inputRef.current?.contains(event.target as Node) &&
+        !addButtonRef.current?.contains(event.target as Node) &&
+        !parentContainerRef.current?.contains(event.target as Node)
       ) {
         setVisible(false);
       }
