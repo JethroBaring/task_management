@@ -39,6 +39,7 @@ export default function NavLinks() {
         !parentContainerRef.current?.contains(event.target as Node)
       ) {
         setVisible(false);
+        setWorkspaceName('')
       }
     };
 
