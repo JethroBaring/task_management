@@ -64,7 +64,7 @@ const Workspace = () => {
 
   useEffect(() => {
     const getColumns = async () => {
-      const response = await fetch(`http://localhost:3000/api/v1/column/${pathname}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/column/${pathname}`);
 
       const data = await response.json();
 

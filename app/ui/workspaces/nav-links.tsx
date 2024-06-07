@@ -53,7 +53,7 @@ export default function NavLinks({ workspaces, id }: { workspaces: any, id: numb
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch('http://localhost:3000/api/v1/workspace/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -73,7 +73,7 @@ export default function NavLinks({ workspaces, id }: { workspaces: any, id: numb
 
   const deleteWorkspace = async (id: number) => {
     const response = await fetch(
-      `http://localhost:3000/api/v1/workspace/${id}`,
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/${id}`,
       {
         method: 'DELETE',
       }

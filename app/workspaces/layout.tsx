@@ -3,7 +3,7 @@ import { getUser } from '../lib/session';
 import { redirect } from 'next/navigation';
 
 async function getData(id: number) {
-  const res = await fetch(`http://localhost:3000/api/v1/workspace/${id}`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/${id}`, {
     cache: 'no-store',
   });
 
