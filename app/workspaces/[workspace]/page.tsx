@@ -6,25 +6,65 @@ import Board from '@/app/ui/workspaces/Board';
 import { usePathname } from 'next/navigation';
 
 const Workspace = () => {
-  const [color, setColor] = useState<string>('#F0F0F0');
-  const [columnHover, setColumnHover] = useState<boolean[]>([
-    false,
-    false,
-    false,
-  ]);
   const [workspaceName, setWorkspaceName] = useState<string>('Workspace name');
   const [editWorkspaceName, setEditWorkspaceName] =
     useState<string>(workspaceName);
   const [edit, setEdit] = useState<boolean>(false);
   const [columns, setColumns] = useState<any[]>([]);
+  const [columnName, setColumnName] = useState<string>('');
+  const [create, setCreate] = useState<boolean>(false)
   const pathname = usePathname().split('/')[2];
   const divRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  const onDragEnd = async (result: { destination: any; source?: any }) => {
+    if (!result.destination) return;
+    const { source, destination } = result;
+
+    if (source.droppableId !== destination.droppableId) {
+      const sourceColIndex = columns.findIndex(
+        (e: any) => e.id.toString() === source.droppableId
+      );
+      const destinationColIndex = columns.findIndex(
+        (e: any) => e.id.toString() === destination.droppableId
+      );
+
+      const sourceCol = columns[sourceColIndex];
+      const destinationCol = columns[destinationColIndex];
+
+      const sourceTask = [...sourceCol.tasks];
+      const destinationTask = [...destinationCol.tasks];
+
+      const [removed] = sourceTask.splice(source.index, 1);
+
+      destinationTask.splice(destination.index, 0, removed);
+      columns[sourceColIndex].tasks = sourceTask;
+      columns[destinationColIndex].tasks = destinationTask;
+
+      setColumns(columns);
+      let status = 'PENDING';
+      if (columns[destinationColIndex].name.includes('In progress')) {
+        status = 'IN_PROGRESS';
+      } else if (columns[destinationColIndex].name.includes('Completed')) {
+        status = 'COMPLETED';
+      }
+    } else {
+      const sourceColIndex = columns.findIndex(
+        (e: any) => e.id === source.droppableId
+      );
+      const sourceCol = columns[sourceColIndex];
+
+      const [removed] = sourceCol.tasks.splice(source.index, 1);
+
+      sourceCol.tasks.splice(destination.index, 0, removed);
+      setColumns([...columns]);
+    }
+  };
+
   useEffect(() => {
     const getColumns = async () => {
-      const response = await fetch(`http://localhost:3000/api/v1/column/2`);
+      const response = await fetch(`http://localhost:3000/api/v1/column/${pathname}`);
 
       const data = await response.json();
 
@@ -47,7 +87,6 @@ const Workspace = () => {
       ) {
         setEdit(false);
         setEditWorkspaceName(workspaceName);
-        console.log('test');
       }
     };
 
@@ -91,11 +130,26 @@ const Workspace = () => {
             {workspaceName}
           </div>
         )}
-        <button>
+        <button onClick={() => {
+          setCreate(true)
+          setColumns([...columns, {
+            id: 1,
+            name: 'test',
+            position: 1,
+            workspaceId: 1,
+            tasks: []
+          }])
+        }}>
           <HiMiniPlus />
         </button>
       </div>
-      {columns.length > 0 ? <Board columnData={columns} /> : ''}
+      {columns.length > 0 ? (
+        <Board columns={columns} onDragEnd={onDragEnd}/>
+      ) : (
+        <div className='flex justify-center items-center h-full w-full'>
+          Start creating your column
+        </div>
+      )}
     </div>
   );
 };

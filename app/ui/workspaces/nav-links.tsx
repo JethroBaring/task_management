@@ -4,18 +4,27 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HiMiniPlus } from 'react-icons/hi2';
+import { HiMiniTrash } from 'react-icons/hi2';
 import React, { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { getUser } from '@/app/lib/session';
 
-export default function NavLinks({ workspaces }: { workspaces: any }) {
-  const router = useRouter();
+export default function NavLinks({ workspaces, id }: { workspaces: any, id: number }) {
   const [links, setLinks] = useState(workspaces);
   const [visible, setVisible] = useState<boolean>(false);
+  const [workspacesHover, setWorkspacesHover] = useState<boolean[]>([]);
   const [workspaceName, setWorkspaceName] = useState<string>('');
+  const pathname = usePathname().split('/')[2];
   const inputRef = useRef<HTMLInputElement>(null);
   const parentContainerRef = useRef<HTMLFormElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
-  const pathname = usePathname().split('/')[2];
+
+  useEffect(() => {
+    let array = [];
+    for (let i = 0; i < workspaces.length; i++) {
+      array.push(false);
+    }
+    setWorkspacesHover(array);
+  }, []);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -51,23 +60,35 @@ export default function NavLinks({ workspaces }: { workspaces: any }) {
       },
       body: JSON.stringify({
         name: workspaceName,
-        creatorId: 1,
+        creatorId: id,
       }),
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      window.location.href=`/workspaces/${data.id}`
-      // setLinks((prevLinks: any) => [
-      //   ...prevLinks,
-      //   { name: `${workspaceName}`, href: `/workspaces/${data.id}` },
-      // ]);
-      // setWorkspaceName('');
-      // setVisible(false);
-      // router.push(`/workspaces/${data.id}`);
-    } else {
-      console.log(response);
+      window.location.href = `/workspaces/${data.id}`;
+    }
+  };
+
+  const deleteWorkspace = async (id: number) => {
+    const response = await fetch(
+      `http://localhost:3000/api/v1/workspace/${id}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      const updatedWorkspaces = links.filter((link: any) => link.id !== data.id);
+      setLinks(updatedWorkspaces);
+      if (updatedWorkspaces[0]) {
+        window.location.href = `/workspaces/${links[0].id}`;
+      } else {
+        window.location.href = "/workspaces"
+      }
     }
   };
 
@@ -109,7 +130,7 @@ export default function NavLinks({ workspaces }: { workspaces: any }) {
       ) : (
         ''
       )}
-      {links.map((link: any) => {
+      {links.map((link: any, index: number) => {
         return (
           <Link
             key={`${link.id}`}
@@ -121,10 +142,26 @@ export default function NavLinks({ workspaces }: { workspaces: any }) {
                   pathname == link.id,
               }
             )}
+            onMouseOver={() => {
+              const updatedHover = [...workspacesHover];
+              updatedHover[index] = true;
+              setWorkspacesHover(updatedHover);
+            }}
+            onMouseLeave={() => {
+              const updatedHover = [...workspacesHover];
+              updatedHover[index] = false;
+              setWorkspacesHover(updatedHover);
+            }}
           >
             <div className='flex items-center justify-between w-full'>
               <p className='hidden md:block'>{link.name}</p>
-              <p>+</p>
+              {workspacesHover[index] === true ? (
+                <button onClick={() => deleteWorkspace(link.id)}>
+                  <HiMiniTrash />
+                </button>
+              ) : (
+                ''
+              )}
             </div>
           </Link>
         );

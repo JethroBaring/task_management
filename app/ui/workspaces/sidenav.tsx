@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import NavLinks from './nav-links';
+import { HiArrowLeftStartOnRectangle } from 'react-icons/hi2';
+import { redirect } from 'next/navigation';
+import { logout } from '@/app/lib/session';
 
 export default function SideNav({
   user,
@@ -20,9 +23,16 @@ export default function SideNav({
         </div>
       </Link>
       <div className='flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
-        <NavLinks workspaces={workspaces} />
-        <form>
+        {workspaces ? <NavLinks workspaces={workspaces} id={user.id} /> : ''}
+        <form
+          action={async () => {
+            'use server';
+            await logout();
+            redirect('/login');
+          }}
+        >
           <button className='flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-slate-100 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3'>
+            <HiArrowLeftStartOnRectangle />
             <div className='hidden md:block'>Sign Out</div>
           </button>
         </form>

@@ -20,22 +20,24 @@ const Register = () => {
       <form className='flex flex-col gap-5' action={formAction}>
         <div className='flex gap-2 w-[350px]'>
           <div className='flex flex-col gap-2 flex-1'>
-            <label htmlFor='username' className='text-sm font-semibold'>
+            <label htmlFor='firstName' className='text-sm font-semibold'>
               First name
             </label>
             <InputText
-              id='username'
+              id='firstName'
+              name='firstName'
               aria-describedby='username-help'
               className='h-10'
               style={{ width: '100%' }}
             />
           </div>
           <div className='flex flex-col gap-2 flex-1'>
-            <label htmlFor='username' className='text-sm font-semibold'>
+            <label htmlFor='lastName' className='text-sm font-semibold'>
               Last name
             </label>
             <InputText
-              id='username'
+              id='lastName'
+              name='lastName'
               aria-describedby='username-help'
               className='h-10'
               style={{ width: '100%' }}
@@ -43,20 +45,21 @@ const Register = () => {
           </div>
         </div>
         <div className='flex flex-col gap-2'>
-          <label htmlFor='username' className='text-sm font-semibold'>
+          <label htmlFor='email' className='text-sm font-semibold'>
             Email
           </label>
           <InputText
-            id='username'
+            id='email'
+            name='email'
             aria-describedby='username-help'
             className='h-10 p-inputtext-sm'
           />
         </div>
         <div className='flex flex-col gap-2'>
-          <label htmlFor='username' className='text-sm font-semibold'>
+          <label htmlFor='password' className='text-sm font-semibold'>
             Password
           </label>
-          <Password toggleMask inputClassName='h-10 w-[350px]' />
+          <Password toggleMask inputClassName='h-10 w-[350px]' id='password' name='password'/>
         </div>
         {error ? <p className='text-sm'>{error}</p> : ''}
         <Button

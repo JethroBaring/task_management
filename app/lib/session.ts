@@ -10,4 +10,13 @@ const getUser = async () => {
   return data?.user;
 };
 
-export default getUser
+const logout = async () => {
+  cookies().set('session', '', {
+    expires: new Date(0)
+  })
+}
+
+export {
+  getUser,
+  logout
+}

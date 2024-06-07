@@ -19,4 +19,6 @@ export const registerAction = async (currentState: any, formData: FormData) => {
   if (response.ok) {
     redirect('/login');
   }
+
+  console.log(response)
 };

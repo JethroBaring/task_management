@@ -1,9 +1,11 @@
 import SideNav from '@/app/ui/workspaces/sidenav';
-import getUser from '../lib/session';
+import { getUser } from '../lib/session';
 import { redirect } from 'next/navigation';
 
-async function getData() {
-  const res = await fetch('http://localhost:3000/api/v1/workspace/1', { cache: 'no-store' });
+async function getData(id: number) {
+  const res = await fetch(`http://localhost:3000/api/v1/workspace/${id}`, {
+    cache: 'no-store',
+  });
 
   if (!res.ok) {
     throw new Error('Failed to fetch data');
@@ -17,14 +19,17 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const workspaces = await getData();
-
   const user = (await getUser()) as {
-    user?: { id: number; email: string; firstName: string; lastName: string };
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
   };
 
-  if(!user) {
-    redirect('/login')
+  const workspaces = await getData(user.id);
+
+  if (!user) {
+    redirect('/login');
   }
 
   return (
