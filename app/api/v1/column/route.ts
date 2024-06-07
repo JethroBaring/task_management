@@ -21,6 +21,9 @@ export const POST = async (request: Request) => {
         position,
         workspaceId,
       },
+      include: {
+        tasks: true
+      }
     });
 
     if (!column) {

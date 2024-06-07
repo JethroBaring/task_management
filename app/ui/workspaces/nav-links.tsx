@@ -6,11 +6,18 @@ import { usePathname } from 'next/navigation';
 import { HiMiniPlus } from 'react-icons/hi2';
 import { HiMiniTrash } from 'react-icons/hi2';
 import React, { useEffect, useRef, useState } from 'react';
-import { getUser } from '@/app/lib/session';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 
-export default function NavLinks({ workspaces, id }: { workspaces: any, id: number }) {
+export default function NavLinks({
+  workspaces,
+  id,
+}: {
+  workspaces: any;
+  id: number;
+}) {
   const [links, setLinks] = useState(workspaces);
   const [visible, setVisible] = useState<boolean>(false);
+  const [dialog, setDialog] = useState<boolean>(false)
   const [workspacesHover, setWorkspacesHover] = useState<boolean[]>([]);
   const [workspaceName, setWorkspaceName] = useState<string>('');
   const pathname = usePathname().split('/')[2];
@@ -53,16 +60,19 @@ export default function NavLinks({ workspaces, id }: { workspaces: any, id: numb
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/`, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: workspaceName,
-        creatorId: id,
-      }),
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: workspaceName,
+          creatorId: id,
+        }),
+      }
+    );
 
     const data = await response.json();
 
@@ -82,12 +92,14 @@ export default function NavLinks({ workspaces, id }: { workspaces: any, id: numb
     const data = await response.json();
 
     if (response.ok) {
-      const updatedWorkspaces = links.filter((link: any) => link.id !== data.id);
+      const updatedWorkspaces = links.filter(
+        (link: any) => link.id !== data.id
+      );
       setLinks(updatedWorkspaces);
       if (updatedWorkspaces[0]) {
         window.location.href = `/workspaces/${links[0].id}`;
       } else {
-        window.location.href = "/workspaces"
+        window.location.href = '/workspaces';
       }
     }
   };
@@ -156,13 +168,24 @@ export default function NavLinks({ workspaces, id }: { workspaces: any, id: numb
             <div className='flex items-center justify-between w-full'>
               <p className='hidden md:block'>{link.name}</p>
               {workspacesHover[index] === true ? (
-                <button onClick={() => deleteWorkspace(link.id)}>
+                <button onClick={() => setDialog(true)}>
                   <HiMiniTrash />
                 </button>
               ) : (
                 ''
               )}
             </div>
+            <ConfirmDialog
+              visible={dialog}
+              onHide={() => setDialog(false)}
+              message='Are you sure you want to proceed?'
+              header='Confirmation'
+              icon='pi pi-exclamation-triangle'
+              accept={() => deleteWorkspace(link.id)}
+              reject={() => setDialog(false)}
+              acceptClassName='h-10 bg-red-500 border-none'
+              rejectClassName='bg-white h-10 text-violet-500 border-none'
+            />
           </Link>
         );
       })}
