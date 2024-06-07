@@ -24,7 +24,10 @@ const Board = ({
   setUpdateDescription,
   updateId,
   setUpdateId,
-  updateTask
+  updateTask,
+  columnRef,
+  newTaskFormRef,
+  newTaskInputRef,
 }: {
   columns: any;
   onDragEnd: any;
@@ -47,7 +50,10 @@ const Board = ({
   setUpdateDescription: any;
   updateId: any;
   setUpdateId: any;
-  updateTask: any
+  updateTask: any;
+  columnRef: any;
+  newTaskFormRef: any;
+  newTaskInputRef: any;
 }) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -56,6 +62,7 @@ const Board = ({
           if (column.id === 9999) {
             return (
               <div
+                ref={columnRef}
                 key={`${column.id}`}
                 className='w-[400px] rounded-md p-3 flex flex-col gap-3 bg-slate-100'
               >
@@ -97,6 +104,8 @@ const Board = ({
                       updateId={updateId}
                       setUpdateId={setUpdateId}
                       updateTask={updateTask}
+                      newTaskInputRef={newTaskInputRef}
+                      newTaskFormRef={newTaskFormRef}
                     />
                   )}
                 </Droppable>

@@ -21,6 +21,8 @@ type Props = {
   updateId: any;
   setUpdateId: any;
   updateTask: any;
+  newTaskInputRef: any
+  newTaskFormRef: any
 };
 
 const TaskCard: React.FC<Props> = ({
@@ -41,6 +43,8 @@ const TaskCard: React.FC<Props> = ({
   updateId,
   setUpdateId,
   updateTask,
+  newTaskFormRef,
+  newTaskInputRef
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const [dialog, setDialog] = useState<boolean>(false);
@@ -49,6 +53,7 @@ const TaskCard: React.FC<Props> = ({
     <>
       {task.id === 9999 ? (
         <form
+          ref={newTaskFormRef}
           onSubmit={(e) => submitTask(e, id)}
           className='rounded-md hover:shadow-violet-500 hover:border text-card-foreground  h-28 bg-white p-3 cursor-pointer flex flex-col gap-2 justify-between'
         >
@@ -57,6 +62,7 @@ const TaskCard: React.FC<Props> = ({
             placeholder='title'
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
+            ref={newTaskInputRef}
           />
           <input
             className='text-sm outline-none'

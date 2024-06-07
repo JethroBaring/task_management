@@ -21,7 +21,9 @@ type Props = {
   setUpdateDescription: any;
   updateId: any;
   setUpdateId: any;
-  updateTask: any
+  updateTask: any;
+  newTaskInputRef: any;
+  newTaskFormRef: any;
 };
 
 const Column: React.FC<Props> = ({
@@ -42,7 +44,9 @@ const Column: React.FC<Props> = ({
   setUpdateDescription,
   updateId,
   setUpdateId,
-  updateTask
+  updateTask,
+  newTaskFormRef,
+  newTaskInputRef,
 }) => {
   const [columnHover, setColumnHover] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
@@ -94,6 +98,8 @@ const Column: React.FC<Props> = ({
             updateId={updateId}
             setUpdateId={setUpdateId}
             updateTask={updateTask}
+            newTaskInputRef={newTaskInputRef}
+            newTaskFormRef={newTaskFormRef}
           />
         ))}
         {provided.placeholder}

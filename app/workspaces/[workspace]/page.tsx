@@ -25,6 +25,11 @@ const Workspace = () => {
   const [updateTitle, setUpdateTitle] = useState<string>('');
   const [updateDescription, setUpdateDescription] = useState<string>('');
   const [updateId, setUpdateId] = useState<number>();
+  const [task, setTask] = useState<boolean>(false)
+  const [taskStatus, setTaskStatus] = useState<number>(-999)
+  const columnRef = useRef<HTMLDivElement>(null);
+  const newTaskInputRef = useRef<HTMLInputElement>(null);
+  const newTaskFormRef = useRef<HTMLFormElement>(null);
 
   const submitTask = async (e: React.FormEvent, statusId: number) => {
     e.preventDefault();
@@ -60,6 +65,8 @@ const Workspace = () => {
   };
 
   const addTask = async (statusId: number) => {
+    setTask(!task)
+    setTaskStatus(statusId)
     const columnIndex = columns.findIndex((column) => column.id === statusId);
     const updatedColumns = [...columns];
     updatedColumns[columnIndex].tasks.push({
@@ -68,7 +75,7 @@ const Workspace = () => {
       description: 'description',
       status: 'todo',
       position: 4,
-      columnId: 13,
+      columnId: statusId,
     });
 
     setColumns(updatedColumns);
@@ -109,8 +116,12 @@ const Workspace = () => {
     }
   };
 
-  const updateTask = async (e: React.FormEvent, id: number, statusId: number) => {
-    e.preventDefault()
+  const updateTask = async (
+    e: React.FormEvent,
+    id: number,
+    statusId: number
+  ) => {
+    e.preventDefault();
     const columnIndex = columns.findIndex((column) => column.id === statusId);
     const response = await fetch(`${BASE_API_URL}/api/v1/task/${id}`, {
       method: 'PATCH',
@@ -120,7 +131,7 @@ const Workspace = () => {
       body: JSON.stringify({
         title: updateTitle,
         description: updateDescription,
-        columnId: statusId
+        columnId: statusId,
       }),
     });
 
@@ -275,12 +286,69 @@ const Workspace = () => {
   }, [edit, workspaceName]);
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        create &&
+        columnInputRef.current &&
+        !columnInputRef.current?.contains(event.target as Node) &&
+        !columnFormRef.current?.contains(event.target as Node) &&
+        !columnRef.current?.contains(event.target as Node)
+      ) {
+        const updatedColumn = columns.filter(
+          (column: any) => column.id !== 9999
+        );
+        setColumns(updatedColumn);
+        setCreate(!create);
+        setColumnName('');
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [create, columnName]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const columnIndex = columns.findIndex((column) => column.id === taskStatus);
+
+      if (
+        task &&
+        newTaskInputRef.current &&
+        !newTaskInputRef.current?.contains(event.target as Node) &&
+        !newTaskFormRef.current?.contains(event.target as Node)
+      ) {
+
+        const updatedColumns = [...columns];
+        updatedColumns[columnIndex].tasks = updatedColumns[
+          columnIndex
+        ].tasks.filter((task: any) => task.id !== 9999);
+        setNewTitle('');
+        setNewDescription('');
+        setColumns(updatedColumns);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [task, columns, newTitle, newDescription, taskStatus]);
+
+  useEffect(() => {
     inputRef.current?.focus();
   }, [edit]);
 
   useEffect(() => {
     columnInputRef.current?.focus();
   }, [create]);
+
+  useEffect(() => {
+    newTaskInputRef.current?.focus();
+  }, [task]);
 
   return (
     <div className='flex h-full flex-col p-3 gap-10'>
@@ -338,6 +406,7 @@ const Workspace = () => {
           addColumn={addColumn}
           columnFormRef={columnFormRef}
           columnInputRef={columnInputRef}
+          columnRef={columnRef}
           deleteColumn={deleteColumn}
           addTask={addTask}
           newTitle={newTitle}
@@ -353,6 +422,8 @@ const Workspace = () => {
           updateId={updateId}
           setUpdateId={setUpdateId}
           updateTask={updateTask}
+          newTaskInputRef={newTaskInputRef}
+          newTaskFormRef={newTaskFormRef}
         />
       ) : (
         <div className='flex justify-center items-center h-full w-full'>
