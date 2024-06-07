@@ -136,7 +136,7 @@ export default function NavLinks({
             type='text'
             value={workspaceName}
             onChange={(e) => setWorkspaceName(e.target.value)}
-            className='bg-white focus:outline-none'
+            className='bg-white focus:outline-none w-full'
           />
         </form>
       ) : (

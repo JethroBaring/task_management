@@ -3,11 +3,6 @@ import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
 import { generateToken } from '@/app/lib/jwt';
 
-// export const GET = async (request: Request) => {
-//   try {
-//   } catch (error) {}
-// };
-
 export const POST = async (request: Request) => {
   try {
     const { title, description, status, position, creatorId, columnId } =

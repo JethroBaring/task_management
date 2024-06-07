@@ -11,6 +11,20 @@ const Board = ({
   columnFormRef,
   columnInputRef,
   deleteColumn,
+  addTask,
+  newTitle,
+  setNewTitle,
+  newDescription,
+  setNewDescription,
+  submitTask,
+  deleteTask,
+  updateTitle,
+  setUpdateTitle,
+  updateDescription,
+  setUpdateDescription,
+  updateId,
+  setUpdateId,
+  updateTask
 }: {
   columns: any;
   onDragEnd: any;
@@ -20,6 +34,20 @@ const Board = ({
   columnFormRef: any;
   columnInputRef: any;
   deleteColumn: any;
+  addTask: any;
+  newTitle: any;
+  setNewTitle: any;
+  newDescription: any;
+  setNewDescription: any;
+  submitTask: any;
+  deleteTask: any;
+  updateTitle: any;
+  setUpdateTitle: any;
+  updateDescription: any;
+  setUpdateDescription: any;
+  updateId: any;
+  setUpdateId: any;
+  updateTask: any
 }) => {
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -55,6 +83,20 @@ const Board = ({
                       provided={provided}
                       name={column.name}
                       deleteColumn={deleteColumn}
+                      addTask={addTask}
+                      newTitle={newTitle}
+                      setNewTitle={setNewTitle}
+                      newDescription={newDescription}
+                      setNewDescription={setNewDescription}
+                      submitTask={submitTask}
+                      deleteTask={deleteTask}
+                      updateTitle={updateTitle}
+                      setUpdateTitle={setUpdateTitle}
+                      updateDescription={updateDescription}
+                      setUpdateDescription={setUpdateDescription}
+                      updateId={updateId}
+                      setUpdateId={setUpdateId}
+                      updateTask={updateTask}
                     />
                   )}
                 </Droppable>

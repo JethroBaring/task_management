@@ -1,13 +1,16 @@
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
+import bcrypt from 'bcrypt';
+import { generateToken } from '@/app/lib/jwt';
 
-export const POST = async (request: Request) => {
+export const GET = async (
+  request: Request,
+  { params }: { params: { id: string } }
+) => {
   try {
-    const { name, creatorId } = await request.json();
-
-    const workspace = await prisma.workspace.create({
-      data: {
-        name,
-        creatorId,
+    const workspace = await prisma.workspace.findFirst({
+      where: {
+        id: Number.parseInt(params.id)
       },
     });
 
@@ -19,7 +22,6 @@ export const POST = async (request: Request) => {
         { status: 404 }
       );
     }
-
     return Response.json(workspace, { status: 200 });
   } catch (error) {
     return Response.json({ error: 'Internal Server Error!' }, { status: 500 });

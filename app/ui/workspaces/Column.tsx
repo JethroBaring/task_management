@@ -1,17 +1,49 @@
 import React, { useState } from 'react';
-import { HiMiniTrash } from 'react-icons/hi2';
-import TaskCard from './Card';
+import { HiMiniPlus, HiMiniPlusSmall, HiMiniTrash } from 'react-icons/hi2';
+import TaskCard from './TaskCard';
 import { ConfirmDialog } from 'primereact/confirmdialog'; // For <ConfirmDialog /> component
-import { confirmDialog } from 'primereact/confirmdialog'; // For confirmDialog method
 
 type Props = {
   column: any;
   provided: any;
   name: string;
   deleteColumn: any;
+  addTask: any;
+  newTitle: any;
+  setNewTitle: any;
+  newDescription: any;
+  setNewDescription: any;
+  submitTask: any;
+  deleteTask: any;
+  updateTitle: any;
+  updateDescription: any;
+  setUpdateTitle: any;
+  setUpdateDescription: any;
+  updateId: any;
+  setUpdateId: any;
+  updateTask: any
 };
 
-const Column: React.FC<Props> = ({ column, provided, name, deleteColumn }) => {
+const Column: React.FC<Props> = ({
+  column,
+  provided,
+  name,
+  deleteColumn,
+  addTask,
+  newTitle,
+  setNewTitle,
+  newDescription,
+  setNewDescription,
+  submitTask,
+  deleteTask,
+  updateTitle,
+  updateDescription,
+  setUpdateTitle,
+  setUpdateDescription,
+  updateId,
+  setUpdateId,
+  updateTask
+}) => {
   const [columnHover, setColumnHover] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
   return (
@@ -23,7 +55,16 @@ const Column: React.FC<Props> = ({ column, provided, name, deleteColumn }) => {
       onMouseLeave={() => setColumnHover(false)}
     >
       <div className='flex items-center justify-between'>
-        <div>{name}</div>
+        <div className='flex gap-1 items-center'>
+          <div>{name}</div>
+          {columnHover ? (
+            <button onClick={() => addTask(column.id)}>
+              <HiMiniPlus />
+            </button>
+          ) : (
+            ''
+          )}
+        </div>
         {columnHover ? (
           <button onClick={() => setVisible(true)}>
             <HiMiniTrash />
@@ -34,7 +75,26 @@ const Column: React.FC<Props> = ({ column, provided, name, deleteColumn }) => {
       </div>
       <div className='flex flex-col gap-3'>
         {column.tasks.map((task: any, index: any) => (
-          <TaskCard task={task} index={index} provided={provided} key={index} />
+          <TaskCard
+            task={task}
+            index={index}
+            provided={provided}
+            key={index}
+            newTitle={newTitle}
+            setNewTitle={setNewTitle}
+            newDescription={newDescription}
+            setNewDescription={setNewDescription}
+            submitTask={submitTask}
+            id={column.id}
+            deleteTask={deleteTask}
+            updateTitle={updateTitle}
+            setUpdateTitle={setUpdateTitle}
+            updateDescription={updateDescription}
+            setUpdateDescription={setUpdateDescription}
+            updateId={updateId}
+            setUpdateId={setUpdateId}
+            updateTask={updateTask}
+          />
         ))}
         {provided.placeholder}
       </div>

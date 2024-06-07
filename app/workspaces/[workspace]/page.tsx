@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { BASE_API_URL } from '@/app/lib/contants';
 
 const Workspace = () => {
-  const [workspaceName, setWorkspaceName] = useState<string>('Workspace name');
+  const [workspaceName, setWorkspaceName] = useState<string>('');
   const [editWorkspaceName, setEditWorkspaceName] =
     useState<string>(workspaceName);
   const [edit, setEdit] = useState<boolean>(false);
@@ -20,11 +20,125 @@ const Workspace = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const columnFormRef = useRef<HTMLFormElement>(null);
   const columnInputRef = useRef<HTMLInputElement>(null);
+  const [newTitle, setNewTitle] = useState<string>('');
+  const [newDescription, setNewDescription] = useState<string>('');
+  const [updateTitle, setUpdateTitle] = useState<string>('');
+  const [updateDescription, setUpdateDescription] = useState<string>('');
+  const [updateId, setUpdateId] = useState<number>();
 
+  const submitTask = async (e: React.FormEvent, statusId: number) => {
+    e.preventDefault();
+    console.log('wew');
+    const columnIndex = columns.findIndex((column) => column.id === statusId);
+    const response = await fetch(`${BASE_API_URL}/api/v1/task/`, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: newTitle,
+        description: newDescription,
+        status: 'todo',
+        position: 1,
+        creatorId: 2,
+        columnId: statusId,
+      }),
+    });
 
-  const addTask = async () => {
-    
-  }
+    const data = await response.json();
+
+    if (response.ok) {
+      const updatedColumns = [...columns];
+      updatedColumns[columnIndex].tasks = updatedColumns[
+        columnIndex
+      ].tasks.filter((task: any) => task.id !== 9999);
+      updatedColumns[columnIndex].tasks.push(data);
+      setNewTitle('');
+      setNewDescription('');
+      setColumns(updatedColumns);
+    }
+  };
+
+  const addTask = async (statusId: number) => {
+    const columnIndex = columns.findIndex((column) => column.id === statusId);
+    const updatedColumns = [...columns];
+    updatedColumns[columnIndex].tasks.push({
+      id: 9999,
+      title: 'Sample',
+      description: 'description',
+      status: 'todo',
+      position: 4,
+      columnId: 13,
+    });
+
+    setColumns(updatedColumns);
+  };
+
+  const deleteTask = async (id: number, statusId: number) => {
+    const columnIndex = columns.findIndex((column) => column.id === statusId);
+    const response = await fetch(`${BASE_API_URL}/api/v1/task/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      const updatedColumns = [...columns];
+      updatedColumns[columnIndex].tasks = updatedColumns[
+        columnIndex
+      ].tasks.filter((task: any) => task.id !== id);
+      setColumns(updatedColumns);
+    }
+  };
+
+  const updateTaskStatus = async (id: number, statusId: number) => {
+    const response = await fetch(`${BASE_API_URL}/api/v1/task/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        columnId: statusId,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return data;
+    }
+  };
+
+  const updateTask = async (e: React.FormEvent, id: number, statusId: number) => {
+    e.preventDefault()
+    const columnIndex = columns.findIndex((column) => column.id === statusId);
+    const response = await fetch(`${BASE_API_URL}/api/v1/task/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: updateTitle,
+        description: updateDescription,
+        columnId: statusId
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      const updatedColumns = [...columns];
+      const taskIndex = updatedColumns[columnIndex].tasks.findIndex(
+        (task: any) => task.id === data.id
+      );
+      updatedColumns[columnIndex].tasks[taskIndex] = data;
+      setUpdateTitle('');
+      setUpdateDescription('');
+      setUpdateId(-1111);
+      setColumns(updatedColumns);
+      return data;
+    }
+  };
 
   const addColumn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +150,7 @@ const Workspace = () => {
       body: JSON.stringify({
         name: columnName,
         position: 3,
-        workspaceId: 35,
+        workspaceId: Number.parseInt(pathname),
       }),
     });
 
@@ -52,7 +166,7 @@ const Workspace = () => {
 
   const deleteColumn = async (id: number) => {
     const response = await fetch(`${BASE_API_URL}/api/v1/column/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
 
     const data = await response.json();
@@ -83,20 +197,23 @@ const Workspace = () => {
 
       const [removed] = sourceTask.splice(source.index, 1);
 
+      console.log(removed);
+      console.log(destination.droppableId);
       destinationTask.splice(destination.index, 0, removed);
       columns[sourceColIndex].tasks = sourceTask;
       columns[destinationColIndex].tasks = destinationTask;
 
-      setColumns(columns);
-      let status = 'PENDING';
-      if (columns[destinationColIndex].name.includes('In progress')) {
-        status = 'IN_PROGRESS';
-      } else if (columns[destinationColIndex].name.includes('Completed')) {
-        status = 'COMPLETED';
+      const update = await updateTaskStatus(
+        removed.id,
+        destination.droppableId
+      );
+
+      if (update) {
+        setColumns(columns);
       }
     } else {
       const sourceColIndex = columns.findIndex(
-        (e: any) => e.id === source.droppableId
+        (e: any) => e.id.toString() === source.droppableId
       );
       const sourceCol = columns[sourceColIndex];
 
@@ -121,7 +238,20 @@ const Workspace = () => {
       }
     };
 
+    const getWorkspace = async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/workspace/single/${pathname}`
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setWorkspaceName(data.name);
+      }
+    };
+
     getColumns();
+    getWorkspace();
   }, [pathname]);
 
   useEffect(() => {
@@ -183,7 +313,7 @@ const Workspace = () => {
         )}
         <button
           onClick={() => {
-            setCreate(!create)
+            setCreate(!create);
             setColumns([
               ...columns,
               {
@@ -209,6 +339,20 @@ const Workspace = () => {
           columnFormRef={columnFormRef}
           columnInputRef={columnInputRef}
           deleteColumn={deleteColumn}
+          addTask={addTask}
+          newTitle={newTitle}
+          setNewTitle={setNewTitle}
+          newDescription={newDescription}
+          setNewDescription={setNewDescription}
+          submitTask={submitTask}
+          deleteTask={deleteTask}
+          updateTitle={updateTitle}
+          setUpdateTitle={setUpdateTitle}
+          updateDescription={updateDescription}
+          setUpdateDescription={setUpdateDescription}
+          updateId={updateId}
+          setUpdateId={setUpdateId}
+          updateTask={updateTask}
         />
       ) : (
         <div className='flex justify-center items-center h-full w-full'>
