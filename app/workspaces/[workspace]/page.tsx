@@ -1,10 +1,9 @@
 'use client';
 
-import Column from '@/app/ui/workspaces/Column';
 import { useEffect, useRef, useState } from 'react';
 import { HiMiniPlus } from 'react-icons/hi2';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Board from '@/app/ui/workspaces/Board';
+import { usePathname } from 'next/navigation';
 
 const Workspace = () => {
   const [color, setColor] = useState<string>('#F0F0F0');
@@ -14,32 +13,29 @@ const Workspace = () => {
     false,
   ]);
   const [workspaceName, setWorkspaceName] = useState<string>('Workspace name');
-  const [editWorkspaceName, setEditWorkspaceName] = useState<string>(workspaceName);
+  const [editWorkspaceName, setEditWorkspaceName] =
+    useState<string>(workspaceName);
   const [edit, setEdit] = useState<boolean>(false);
-  const [columns, setColumns] = useState([
-    {
-      id: '1',
-      title: ' 📃 To do',
-      tasks: [
-        { id: '11', title: 'Learn JavaScript' },
-        { id: '12', title: 'Learn Git' },
-        { id: '13', title: 'Learn Python' },
-      ],
-    },
-    {
-      id: '2',
-      title: ' ✏️ In progress',
-      tasks: [],
-    },
-    {
-      id: '3',
-      title: ' ✔️ Completed',
-      tasks: [],
-    },
-  ]);
+  const [columns, setColumns] = useState<any[]>([]);
+  const pathname = usePathname().split('/')[2];
   const divRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const getColumns = async () => {
+      const response = await fetch(`http://localhost:3000/api/v1/column/2`);
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setColumns(data);
+        console.log(data);
+      }
+    };
+
+    getColumns();
+  }, [pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,47 +61,6 @@ const Workspace = () => {
   useEffect(() => {
     inputRef.current?.focus();
   }, [edit]);
-
-  useEffect(() => {
-    console.log(color);
-  }, [color]);
-
-  const onDragEnd = async (result: { destination: any; source?: any }) => {
-    if (!result.destination) return;
-    const { source, destination } = result;
-
-    if (source.droppableId !== destination.droppableId) {
-      const sourceColIndex = columns.findIndex((e) => e.id === source.droppableId);
-      const destinationColIndex = columns.findIndex((e) => e.id === destination.droppableId);
-
-      const sourceCol = columns[sourceColIndex];
-      const destinationCol = columns[destinationColIndex];
-
-      const sourceTask = [...sourceCol.tasks];
-      const destinationTask = [...destinationCol.tasks];
-
-      const [removed] = sourceTask.splice(source.index, 1);
-      destinationTask.splice(destination.index, 0, removed);
-
-      const updatedColumns = [...columns];
-      updatedColumns[sourceColIndex] = { ...sourceCol, tasks: sourceTask };
-      updatedColumns[destinationColIndex] = { ...destinationCol, tasks: destinationTask };
-
-      setColumns(updatedColumns);
-    } else {
-      const sourceColIndex = columns.findIndex((e) => e.id === source.droppableId);
-      const sourceCol = columns[sourceColIndex];
-
-      const tasks = [...sourceCol.tasks];
-      const [removed] = tasks.splice(source.index, 1);
-      tasks.splice(destination.index, 0, removed);
-
-      const updatedColumns = [...columns];
-      updatedColumns[sourceColIndex] = { ...sourceCol, tasks };
-
-      setColumns(updatedColumns);
-    }
-  };
 
   return (
     <div className='flex h-full flex-col p-3 gap-10'>
@@ -140,50 +95,7 @@ const Workspace = () => {
           <HiMiniPlus />
         </button>
       </div>
-      <Board />
-      {/* <DragDropContext onDragEnd={onDragEnd}>
-        <div className='flex gap-5  w-full h-full'>
-          {columns.map((column) => (
-            <Droppable key={column.id} droppableId={column.id}>
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  className='w-[400px] rounded-md p-3 flex flex-col gap-3 bg-slate-100'
-                  ref={provided.innerRef}
-                >
-                  <div>{column.title}</div>
-                  <div className='flex flex-col gap-5'>
-                    {column.tasks.map((task, index) => (
-                      <Draggable
-                        key={task.id}
-                        draggableId={task.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            style={{
-                              ...provided.draggableProps.style,
-                              opacity: snapshot.isDragging ? '0.5' : '1',
-                            }}
-                          >
-                            <div className='bg-blue-50'>
-                              {task.title}
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
-      </DragDropContext> */}
+      {columns.length > 0 ? <Board columnData={columns} /> : ''}
     </div>
   );
 };

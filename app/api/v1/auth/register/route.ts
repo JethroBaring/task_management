@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
 
-export const GET = async (req: NextRequest, res: NextResponse) => {
+export const POST = async (request: Request) => {
   try {
-    const data = await req.json();
+    const data = await request.json();
     const exist = await prisma.user.findFirst({
       where: {
         email: data.email,
@@ -25,17 +25,20 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
       });
 
       if (user) {
-        return NextResponse.json({
-          id: user.id,
-          email: user.email,
-        });
+        return Response.json(
+          {
+            id: user.id,
+            email: user.email,
+          },
+          { status: 200 }
+        );
       }
 
-      return NextResponse.json({ error: 'Email already exists.' });
+      return Response.json({ error: 'User creation failed.' }, { status: 500 });
     }
 
-    return NextResponse.json({ error: `Email already exists.` });
+    return Response.json({ error: `Email already exists.` }, { status: 409 });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error!' });
+    return Response.json({ error: 'Internal Server Error!' }, { status: 500 });
   }
 };

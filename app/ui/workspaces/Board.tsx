@@ -1,49 +1,20 @@
 import Column from '@/app/ui/workspaces/Column';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HiMiniPlus } from 'react-icons/hi2';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 
-const Board = () => {
-  const [columns, setColumns] = useState([
-    {
-      id: '1',
-      title: ' 📃 To do',
-      tasks: [
-        {
-          id: '11',
-          title: 'Learn JavaScript',
-        },
-        {
-          id: '12',
-          title: 'Learn Git',
-        },
-        {
-          id: '13',
-          title: 'Learn Python',
-        },
-      ],
-    },
-    {
-      id: '2',
-      title: ' ✏️ In progress',
-      tasks: [],
-    },
-    {
-      id: '3',
-      title: ' ✔️ Completed',
-      tasks: [],
-    },
-  ]);
+const Board = ({ columnData }: { columnData: any }) => {
+  const [columns, setColumns] = useState(columnData);
   const onDragEnd = async (result: { destination: any; source?: any }) => {
     if (!result.destination) return;
     const { source, destination } = result;
 
     if (source.droppableId !== destination.droppableId) {
       const sourceColIndex = columns.findIndex(
-        (e) => e.id === source.droppableId
+        (e: any) => e.id.toString() === source.droppableId
       );
       const destinationColIndex = columns.findIndex(
-        (e) => e.id === destination.droppableId
+        (e: any) => e.id.toString() === destination.droppableId
       );
 
       const sourceCol = columns[sourceColIndex];
@@ -60,14 +31,14 @@ const Board = () => {
 
       setColumns(columns);
       let status = 'PENDING';
-      if (columns[destinationColIndex].title.includes('In progress')) {
+      if (columns[destinationColIndex].name.includes('In progress')) {
         status = 'IN_PROGRESS';
-      } else if (columns[destinationColIndex].title.includes('Completed')) {
+      } else if (columns[destinationColIndex].name.includes('Completed')) {
         status = 'COMPLETED';
       }
     } else {
       const sourceColIndex = columns.findIndex(
-        (e) => e.id === source.droppableId
+        (e: any) => e.id === source.droppableId
       );
       const sourceCol = columns[sourceColIndex];
 
@@ -77,16 +48,22 @@ const Board = () => {
       setColumns([...columns]);
     }
   };
+
+  // useEffect(() => {
+  //   setColumns(columnData)
+  // }, [columnData]);
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className='flex gap-5  w-full h-full'>
-        {columns.map((column) => (
+        {columns.map((column: any) => (
           <Droppable key={`${column.id}`} droppableId={`${column.id}`}>
             {(provided) => (
               <Column
                 key={`${column.id}`}
                 tasks={column.tasks}
                 provided={provided}
+                name={column.name}
               />
             )}
           </Droppable>

@@ -3,9 +3,9 @@ import prisma from '@/app/lib/prisma';
 import bcrypt from 'bcrypt';
 import { generateToken } from '@/app/lib/jwt';
 
-export const GET = async (req: NextRequest, res: NextResponse) => {
+export const POST = async (request: Request) => {
   try {
-    const data = await req.json();
+    const data = await request.json();
     const exist = await prisma.user.findFirst({
       where: {
         email: data.email,
@@ -19,14 +19,24 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
       );
 
       if (passwordMatched) {
-        return NextResponse.json(generateToken(exist.id));
+        return Response.json(
+          {
+            token: await generateToken(
+              exist.id,
+              exist.email,
+              exist.firstName,
+              exist.lastName
+            ),
+          },
+          { status: 200 }
+        );
       }
 
-      return NextResponse.json({ error: 'Invalid credentials.' });
+      return Response.json({ error: 'Invalid credentials.' }, { status: 401 });
     }
 
-    return NextResponse.json({ error: `Email doesn't exists.` });
+    return Response.json({ error: `Email doesn't exists.` }, { status: 404 });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error!' });
+    return Response.json({ error: 'Internal Server Error!' }, { status: 500 });
   }
 };

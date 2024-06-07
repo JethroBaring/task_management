@@ -4,27 +4,18 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { HiMiniPlus } from 'react-icons/hi2';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
-export default function NavLinks() {
-  const [links, setLinks] = useState([
-    { name: 'Home', href: '/dashboard' },
-    {
-      name: 'Invoices',
-      href: '/dashboard/invoices',
-    },
-    { name: 'Customers', href: '/dashboard/customers' },
-  ]);
+export default function NavLinks({ workspaces }: { workspaces: any }) {
+  const router = useRouter();
+  const [links, setLinks] = useState(workspaces);
   const [visible, setVisible] = useState<boolean>(false);
   const [workspaceName, setWorkspaceName] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
   const parentContainerRef = useRef<HTMLFormElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
-  const pathname = usePathname();
+  const pathname = usePathname().split('/')[2];
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -39,7 +30,7 @@ export default function NavLinks() {
         !parentContainerRef.current?.contains(event.target as Node)
       ) {
         setVisible(false);
-        setWorkspaceName('')
+        setWorkspaceName('');
       }
     };
 
@@ -52,12 +43,32 @@ export default function NavLinks() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLinks((prevLinks) => [
-      ...prevLinks,
-      { name: `${workspaceName}`, href: `/dashboard/${workspaceName}` },
-    ]);
-    setWorkspaceName('');
-    setVisible(false);
+
+    const response = await fetch('http://localhost:3000/api/v1/workspace/', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: workspaceName,
+        creatorId: 1,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      window.location.href=`/workspaces/${data.id}`
+      // setLinks((prevLinks: any) => [
+      //   ...prevLinks,
+      //   { name: `${workspaceName}`, href: `/workspaces/${data.id}` },
+      // ]);
+      // setWorkspaceName('');
+      // setVisible(false);
+      // router.push(`/workspaces/${data.id}`);
+    } else {
+      console.log(response);
+    }
   };
 
   return (
@@ -68,7 +79,7 @@ export default function NavLinks() {
         )}
       >
         <div className='flex justify-between items-center w-full'>
-          <p className='hidden md:block'>Workspaces</p>
+          <p className='hidden md:block'>Workspaces </p>
           <button
             onClick={() => {
               setVisible(!visible);
@@ -98,20 +109,23 @@ export default function NavLinks() {
       ) : (
         ''
       )}
-      {links.map((link) => {
+      {links.map((link: any) => {
         return (
           <Link
-            key={link.name}
-            href={link.href}
+            key={`${link.id}`}
+            href={`/workspaces/${link.id}`}
             className={clsx(
               'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-gradient-to-r from-blue-600 to-violet-600 hover:text-white md:flex-none md:justify-start md:p-2 md:px-3',
               {
                 'bg-gradient-to-r from-blue-600 to-violet-600 text-white':
-                  pathname === link.href,
+                  pathname == link.id,
               }
             )}
           >
-            <p className='hidden md:block'>{link.name}</p>
+            <div className='flex items-center justify-between w-full'>
+              <p className='hidden md:block'>{link.name}</p>
+              <p>+</p>
+            </div>
           </Link>
         );
       })}

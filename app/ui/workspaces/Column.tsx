@@ -5,9 +5,10 @@ import TaskCard from './Card';
 type Props = {
   tasks: any[];
   provided: any;
+  name: string
 };
 
-const Column: React.FC<Props> = ({ tasks, provided }) => {
+const Column: React.FC<Props> = ({ tasks, provided, name }) => {
   const [color, setColor] = useState<string>('#F0F0F0');
   const [columnHover, setColumnHover] = useState<boolean[]>([
     false,
@@ -19,8 +20,8 @@ const Column: React.FC<Props> = ({ tasks, provided }) => {
     <div
       {...provided.droppableProps}
       ref={provided.innerRef}
-      className='w-[400px] rounded-md p-3 flex flex-col gap-3'
-      style={{ backgroundColor: color }}
+      className='w-[400px] rounded-md p-3 flex flex-col gap-3 bg-slate-100'
+      // style={{ backgroundColor: color }}
       onMouseOver={() =>
         setColumnHover((prevColumnHover) => {
           const updatedColumnHover = [...prevColumnHover];
@@ -37,7 +38,7 @@ const Column: React.FC<Props> = ({ tasks, provided }) => {
       }
     >
       <div className='flex items-center justify-between'>
-        <div>Title</div>
+        <div>{name}</div>
         {columnHover[0] ? (
           <button>
             <label htmlFor='test'>
