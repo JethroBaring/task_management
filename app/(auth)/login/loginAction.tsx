@@ -7,7 +7,7 @@ export const loginAction = async (currentState: any, formData: FormData) => {
   const email = formData.get('email');
   const password = formData.get('password');
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/auth/login`, {
+  const response = await fetch(`/api/v1/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
