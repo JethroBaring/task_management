@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  console.log(request)
+  console.log("HANNAH")
   const cookie = cookies().get('session');
 
   if (!cookie) {
